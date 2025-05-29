@@ -46,10 +46,10 @@ If you want to restrict both player remote IP and typed hostname, use this line:
 
 ### Commands
 * /sessionskip reload - Reloads the plugin and config file.
-* /sessionskip enable - Enables SessionSkip until BungeeCord is restarted.
-* /sessionskip disable - Disables SessionSkip until BungeeCord is restarted.
+* /sessionskip enable - Enables SessionSkip until Velocity is restarted.
+* /sessionskip disable - Disables SessionSkip until Velocity is restarted.
 
-SessionSkip has a "enabled" setting in the config file, which will determine whether it is enabled (true) or disabled (false) by default when BungeeCord starts up.
+SessionSkip has a "enabled" setting in the config file, which will determine whether it is enabled (true) or disabled (false) by default when Velocity starts up.
 
 ### Aliases
 * /sskip -> /sessionskip
