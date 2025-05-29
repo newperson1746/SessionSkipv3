@@ -1,4 +1,4 @@
-ame: Java CI & Artifact
+name: Java CI & Artifact
 
 on:
   push:
