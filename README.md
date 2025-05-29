@@ -17,6 +17,11 @@ The plugin will autogenerate a config file for you on first run in its correspon
 * Otherwise, I mirror the downloads in the Releases when a release is known to be stable as well
 * Drag the jar into your Velocity plugins folder!
 
+### Building/Compiling
+* JDK 17
+* clone repo
+* `mvn clean package`
+
 ### Configuration
 SessionSkip allows players to skip authentication with the Mojang session servers when they meet one of the following configurable criterion:
 * They connect to a specific listener/hostname combination.
