@@ -12,9 +12,10 @@ SessionSkipv3 is a simple Velocity plugin to skip authentication with the Minecr
 
 The plugin will autogenerate a config file for you on first run in its corresponding plugins subdirectory!
 
-### Installation
+### Installation/Download
 * If you have a GitHub account, latest commit: from Actions, clicking into newest successful "Java CI & Artifact" -> download sessionskipv3-jar
-* From SpigotMC/Hangar (COMING SOON WHILE I PUBLISH)
+* Otherwise, I mirror the downloads in the Releases when a release is known to be stable as well
+* Drag the jar into your Velocity plugins folder!
 
 ### Configuration
 SessionSkip allows players to skip authentication with the Mojang session servers when they meet one of the following configurable criterion:
