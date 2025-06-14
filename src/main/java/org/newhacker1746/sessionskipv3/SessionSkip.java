@@ -142,7 +142,7 @@ public String reloadConfig() {
       String token      = playerName + "@" + playerIp + "/" + hostname;
 
     // 1) If Floodgate or others already forced offline, bail
-      if (!event.getResult().isAllowed() || event.getResult().isForceOfflineMode()) {
+      if (event.getResult().isForceOfflineMode()) {
           return;
       }
 
