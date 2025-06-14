@@ -2,6 +2,7 @@ package org.newhacker1746.sessionskipv3;
 
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandMeta;
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 // Decided not to manipulate at GameProfile level and to just use Prelogin stuff
 // (like the original SessionSkip)
@@ -128,8 +129,9 @@ public String reloadConfig() {
 
 /**
    * Earliest-possible hook: force offline-mode before any session check.
+   * Run LAST: so we don't conflict with, i.e. floodgate (they run EARLY)
    */
-  @Subscribe
+  @Subscribe(order = PostOrder.LATE)
   public void onPreLogin(PreLoginEvent event) {
       InboundConnection conn = event.getConnection();
       String playerName = event.getUsername();
@@ -139,9 +141,13 @@ public String reloadConfig() {
                               .orElse("");
       String token      = playerName + "@" + playerIp + "/" + hostname;
 
+    // 1) If Floodgate or others already forced offline, bail
+      if (!event.getResult().isAllowed() || event.getResult().isForceOfflineMode()) {
+          return;
+      }
+
       if (!enabled) {
           logger.info("We are not enabled, letting {} authenticate normally", playerName);
-          event.setResult(PreLoginComponentResult.allowed());
           return;
       }
 
@@ -184,9 +190,8 @@ public String reloadConfig() {
       }
 
       if (debug) {
-          logger.info("No skip-rule matched for {}, proceeding normally", playerName);
+          logger.info("No skip-rule matched for {}, letting them authenticate normally", playerName);
       }
-      event.setResult(PreLoginComponentResult.allowed());
   }
 
     private void logSkip(String reason, String player, String token) {
