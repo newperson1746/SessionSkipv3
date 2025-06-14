@@ -32,7 +32,7 @@ import java.util.Optional;
 @Plugin(
     id = "sessionskipv3",
     name = "SessionSkip v3",
-    version = "3.0.0",
+    version = "3.0.1",
     description = "Skip authentication with the Mojang session servers under certain conditions.",
     authors = {"newhacker1746"}
 )
