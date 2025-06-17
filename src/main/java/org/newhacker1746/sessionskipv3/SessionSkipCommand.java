@@ -2,7 +2,8 @@ package org.newhacker1746.sessionskipv3;
 
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.command.CommandSource;
-import com.velocitypowered.api.proxy.ConsoleCommandSource;
+import com.velocitypowered.api.proxy.Player;
+
 import net.kyori.adventure.text.Component;
 
 public class SessionSkipCommand implements SimpleCommand {
@@ -35,18 +36,22 @@ public class SessionSkipCommand implements SimpleCommand {
 
         switch (args[0].toLowerCase()) {
             case "reload":
-                String resultMsg = plugin.reloadConfig();
-                if (!(src instanceof ConsoleCommandSource)) {
-                    src.sendMessage(Component.text(resultMsg));
+                String result1 = plugin.reloadConfig(src);
+                if (src instanceof Player) {
+                    src.sendMessage(Component.text(result1));
                 }
                 break;
             case "disable":
-                plugin.setEnabled(false);
-                src.sendMessage(Component.text("[SessionSkip] Plugin disabled (effective until restart)."));
+                String result2 = plugin.setEnabled(false, src);
+                if (src instanceof Player) {
+                    src.sendMessage(Component.text(result2));
+                }
                 break;
             case "enable":
-                plugin.setEnabled(true);
-                src.sendMessage(Component.text("[SessionSkip] Plugin enabled (effective until restart)."));
+                String result3 = plugin.setEnabled(true, src);
+                if (src instanceof Player) {
+                    src.sendMessage(Component.text(result3));
+                }
                 break;
             default:
                 usage(src);

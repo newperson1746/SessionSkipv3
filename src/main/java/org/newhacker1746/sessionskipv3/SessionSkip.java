@@ -2,6 +2,8 @@ package org.newhacker1746.sessionskipv3;
 
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandMeta;
+import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 // Decided not to manipulate at GameProfile level and to just use Prelogin stuff
@@ -20,19 +22,17 @@ import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.net.InetSocketAddress;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Plugin(
     id = "sessionskipv3",
     name = "SessionSkip v3",
-    version = "3.0.1",
+    version = "3.0.3",
     description = "Skip authentication with the Mojang session servers under certain conditions.",
     authors = {"newhacker1746"}
 )
@@ -107,31 +107,54 @@ public class SessionSkip {
         this.players   = root.node("players").getList(String.class, new ArrayList<>());
     }
 
-public String reloadConfig() {
-    try {
-        loadConfig();
-        String msg = String.format(
-            "[SessionSkip] Config reloaded: enabled=%s, debug=%s, listeners=%d, hostnames=%d, remoteips=%d, players=%d",
-            enabled, debug, listeners.size(), hostnames.size(), remoteips.size(), players.size()
-        );
+    public String reloadConfig(CommandSource src) {
+        String msg;
+        try {
+            loadConfig();
+            if (src instanceof Player p) {
+                msg = String.format(
+                    "[SessionSkip] Config reloaded by %s: enabled=%s, debug=%s, listeners=%d, hostnames=%d, remoteips=%d, players=%d",
+                    p.getUsername(), enabled, debug, listeners.size(), hostnames.size(), remoteips.size(), players.size()
+                );
+            } else {
+                msg = String.format(
+                    "[SessionSkip] Config reloaded: enabled=%s, debug=%s, listeners=%d, hostnames=%d, remoteips=%d, players=%d",
+                    enabled, debug, listeners.size(), hostnames.size(), remoteips.size(), players.size()
+                );
+            }
+            logger.info(msg);
+            return msg;
+        } catch (IOException e) {
+            logger.error("Reload failed: ", e);
+            String err = String.format("[SessionSkip] Reload failed: %s", e.getMessage());
+            return err;
+        }
+    }
+
+    public String setEnabled(boolean enabled, CommandSource src) {
+        String msg;
+        this.enabled = enabled;
+
+        if (src instanceof Player p) {
+            msg = String.format(
+                "[SessionSkip] Plugin {} by {} (effective until restart)",
+                enabled ? "enabled": "disabled", p.getUsername()
+            );
+        } else {
+            msg = String.format(
+                "[SessionSkip] Plugin {} (effective until restart)",
+                enabled ? "enabled": "disabled"
+            );
+        }
+
         logger.info(msg);
         return msg;
-    } catch (IOException e) {
-        logger.error("Reload failed: ", e);
-        String err = String.format("[SessionSkip] Reload failed: %s", e.getMessage());
-        return err;
-    }
-}
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
     }
 
 /**
    * Earliest-possible hook: force offline-mode before any session check.
-   * Run LAST: so we don't conflict with, i.e. floodgate (they run EARLY)
    */
-  @Subscribe(order = PostOrder.LATE)
+  @Subscribe(order = PostOrder.NORMAL)
   public void onPreLogin(PreLoginEvent event) {
       InboundConnection conn = event.getConnection();
       String playerName = event.getUsername();
@@ -141,19 +164,12 @@ public String reloadConfig() {
                               .orElse("");
       String token      = playerName + "@" + playerIp + "/" + hostname;
 
-    // 1) If Floodgate or others already forced offline, bail
-      if (event.getResult().isForceOfflineMode()) {
-          return;
-      }
-
       if (!enabled) {
-          logger.info("We are not enabled, letting {} authenticate normally", playerName);
+          logger.info("Not enabled, letting {} authenticate normally", playerName);
           return;
       }
 
-      if (debug) {
-          logger.info("PreLogin connection: {}", token);
-      }
+      debugLog("PreLogin connection: {}", token);
 
       // listener rule
       String listenerStr = conn.getVirtualHost()
@@ -189,12 +205,17 @@ public String reloadConfig() {
           return;
       }
 
-      if (debug) {
-          logger.info("No skip-rule matched for {}, letting them authenticate normally", playerName);
-      }
+      debugLog("No skip-rule matched for {}, letting them authenticate normally", playerName);
   }
 
     private void logSkip(String reason, String player, String token) {
         logger.info("Skipping authentication for {} — reason: {} matched {}", player, reason, token);
     }
+
+    private void debugLog(String format, Object... args) {
+        if (debug) {
+            logger.info(format, args);
+        }
+    }
+
 }
