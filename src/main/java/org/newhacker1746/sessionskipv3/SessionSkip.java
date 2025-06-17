@@ -154,7 +154,7 @@ public class SessionSkip {
 /**
    * Earliest-possible hook: force offline-mode before any session check.
    */
-  @Subscribe(order = PostOrder.NORMAL)
+  @Subscribe(order = PostOrder.LATE)
   public void onPreLogin(PreLoginEvent event) {
       InboundConnection conn = event.getConnection();
       String playerName = event.getUsername();
